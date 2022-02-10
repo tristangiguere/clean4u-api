@@ -116,7 +116,7 @@ router.post('/', async (req, res, next) => {
         subtotal: req.body.subtotal,
         taxTotal: req.body.taxTotal,
         total: req.body.total
-}
+    }
     try{
 
         let results = await invoicesDb.new(invoice);
@@ -139,9 +139,6 @@ router.put('/:id/cancel', async (req, res, next) => {
         res.sendStatus(500);
     }
 });
-
-
-
 
 
 module.exports = router;
