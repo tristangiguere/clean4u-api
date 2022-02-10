@@ -71,4 +71,18 @@ invoicesDb.new = (invoice) => {
     })
 };
 
+// Cancel invoice
+invoicesDb.cancel = (id) => {
+    return new Promise((resolve, reject) => {
+        pool.query('UPDATE invoices_new SET status = 9 WHERE id = ?', [id], (err, results) => {
+            if(err){
+                return reject(err);
+            }
+            return resolve(results)
+        })
+    })
+};
+
+
+
 module.exports = invoicesDb;

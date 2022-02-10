@@ -76,7 +76,7 @@ router.get('/:id', async (req, res, next) => {
     }
 });
 
-// Get single invoice by ID
+// Add new invoice
 router.post('/', async (req, res, next) => {
 
     var date = new Date();
@@ -127,6 +127,20 @@ router.post('/', async (req, res, next) => {
         res.sendStatus(500);
     }
 });
+
+// Cancel invoice
+router.put('/:id/cancel', async (req, res, next) => {
+    try{
+        let results = await invoicesDb.cancel(req.params.id);
+        res.json(results);
+    }
+    catch(e){
+        console.log(e);
+        res.sendStatus(500);
+    }
+});
+
+
 
 
 
