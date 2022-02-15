@@ -4,6 +4,8 @@ const router = express.Router();
 
 const invoicesDb = require('../data/invoices');
 
+const pdfService = require('../service/pdf-service');
+
 // Get all invoices
 router.get('/', async (req, res, next) => {
     try{
@@ -140,6 +142,34 @@ router.put('/:id/cancel', async (req, res, next) => {
     }
 });
 
+// Stream invoice PDF
+router.get('/:id/pdf',async (req, res, next) => {
+    try{
+        let invoice = await invoicesDb.one(req.params.id);
+
+        if (invoice){
+        var fileName = 'Clean4U Invoice #' + req.params.id;
+
+        const stream = res.writeHead(200, {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment;filename=` + fileName,
+        });
+
+        // Pass data to PDF service and generate PDF.
+        pdfService.buildInvoicePDF((chunk) => stream.write(chunk), () => stream.end(), invoice);
+        
+        }
+        else{
+            res.sendStatus(500);
+        }
+    }
+
+    catch(e){
+        console.log(e);
+        res.sendStatus(500);
+    }
+  });
+  
 
 module.exports = router;
 

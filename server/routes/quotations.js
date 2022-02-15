@@ -16,7 +16,6 @@ router.get('/', async (req, res, next) => {
     }
 });
 
-
 // Get all accepted quotes
 router.get('/accepted', async (req, res, next) => {
     try{
