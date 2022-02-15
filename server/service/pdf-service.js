@@ -96,7 +96,6 @@ const PDFDocument = require('pdfkit');
       "Description",
       "Unit Cost",
       "Quantity",
-      "Tax",
       "Line Total"
     );
     generateHr(doc, invoiceTableTop + 20);
@@ -112,7 +111,6 @@ const PDFDocument = require('pdfkit');
             invoice.description_1,
             formatCurrency(invoice.price_1),
             invoice.qty_1,
-            invoice.tax_amt_1,
             formatCurrency(invoice.rowtotal_1)
           );
           generateHr(doc,  invoiceTableTop + (i) * 30 + 20);
@@ -130,7 +128,6 @@ const PDFDocument = require('pdfkit');
         invoice.description_2,
         formatCurrency(invoice.price_2),
         invoice.qty_2,
-        invoice.tax_amt_2,
         formatCurrency(invoice.rowtotal_2)
       );
       generateHr(doc,  invoiceTableTop + (i) * 30 + 20);
@@ -149,7 +146,6 @@ const PDFDocument = require('pdfkit');
         invoice.description_3,
         formatCurrency(invoice.price_3),
         invoice.qty_3,
-        invoice.tax_amt_3,
         formatCurrency(invoice.rowtotal_3)
       );
 
@@ -166,7 +162,6 @@ const PDFDocument = require('pdfkit');
       "",
       "",
       "",
-      "",
       "Subtotal",
       formatCurrency(invoice.subtotal)
     );
@@ -177,8 +172,7 @@ const PDFDocument = require('pdfkit');
         "",
         "",
         "",
-        "",
-        "Tax (" + (invoice.taxTotal / invoice.total * 100).toFixed(2) + "%)" ,
+        "Tax (" + (invoice.taxTotal / invoice.subtotal * 100).toFixed(2) + "%)" ,
         formatCurrency(invoice.taxTotal)
       );
       doc.font("Helvetica");
@@ -203,9 +197,8 @@ const PDFDocument = require('pdfkit');
       "",
       "",
       "",
-      "",
       "Balance Due",
-      formatCurrency(invoice.subtotal)
+      formatCurrency(invoice.total)
     );
     doc.font("Helvetica");
     
@@ -229,16 +222,14 @@ const PDFDocument = require('pdfkit');
     description,
     unitCost,
     quantity,
-    tax,
     lineTotal
   ) {
     doc
       .fontSize(10)
       .text(item, 50, y)
       .text(description, 160, y)
-      .text(unitCost, 260, y, { width: 90, align: "right" })
-      .text(quantity, 330, y, { width: 90, align: "right" })
-      .text(tax, 370, y, { width: 90, align: "right" })
+      .text(unitCost, 300, y, { width: 90, align: "right" })
+      .text(quantity, 370, y, { width: 90, align: "right" })
       .text(lineTotal, 0, y, { align: "right" });
   }
   
@@ -251,8 +242,8 @@ const PDFDocument = require('pdfkit');
       .stroke();
   }
   
-  function formatCurrency(cents) {
-    return "$" + (cents / 100).toFixed(2);
+  function formatCurrency(amt) {
+    return "$" + amt.toFixed(2);
   }
   
   function formatDate(date) {
