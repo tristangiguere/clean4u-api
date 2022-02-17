@@ -1,8 +1,19 @@
 const express = require('express');
-
 const router = express.Router();
-
 const quotationDb = require('../data/quotations');
+const { v4: uuidv4 } = require('uuid');
+const mailer = require('nodemailer');
+
+// DEFINE TRANSPORT MAILER INFO
+const transporter = mailer.createTransport({
+    host: "smtp.mailtrap.io",
+    port: 587,
+    secure: false, // TODO - upgrade later with STARTTLS
+    auth: {
+      user: "6adeec485fd17d",
+      pass: "77e50fbdd058b5",
+    },
+});
 
 // Get all quotes
 router.get('/', async (req, res, next) => {
@@ -106,7 +117,9 @@ router.post('/', async (req, res, next) => {
         rowtotal_3: req.body.rowtotal_3,
         subtotal: req.body.subtotal,
         taxTotal: req.body.taxTotal,
-        total: req.body.total
+        total: req.body.total,
+        public_key: uuidv4()
+
     }
     try{
 
@@ -131,7 +144,46 @@ router.put('/:id/cancel', async (req, res, next) => {
     }
 });
 
+// Send quotation via email
+router.post('/:id/send', async (req, res, next) => {
+    try{
+        let quotation = await quotationDb.one(req.params.id);
+
+        if (quotation) {
+            sendQuotation(quotation);
+            res.sendStatus(200);
+        }
+        else{
+            console.log('Cannot send empty quotation object.');
+            res.sendStatus(500);
+        }
+    }
+    catch(e){
+        console.log(e);
+        res.sendStatus(500);
+    }
+});
+
+// Logic to send mail.
+function sendQuotation(quotation){
+
+    var date = quotation.expiration_date.toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    
+    var mailOptions = {
+        from: 'info@clean4umtl.com',
+        to: quotation.email,
+        subject: `Your quotation #${quotation.id} from Clean4U MTL`,
+        html: `<p>Hello ${quotation.name},<br/>You have a new quotation from Clean4U Montreal.<hr><br/><strong>Quote #${quotation.id}</strong> will exire on ${date}.<br/><a href="http://localhost:8000/customer/quote/${quotation.public_key}">Click here to view your quotation.</a></p>`
+      };
+      
+      transporter.sendMail(mailOptions, function(error, info){
+        if (error) {
+          console.log(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+        }
+      });
+}
+
 
 module.exports = router;
-
-

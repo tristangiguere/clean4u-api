@@ -1,10 +1,20 @@
 const express = require('express');
-
+const mailer = require('nodemailer');
 const router = express.Router();
-
 const invoicesDb = require('../data/invoices');
-
 const pdfService = require('../service/pdf-service');
+const { v4: uuidv4 } = require('uuid');
+
+// DEFINE TRANSPORT MAILER INFO
+const transporter = mailer.createTransport({
+    host: "smtp.mailtrap.io",
+    port: 587,
+    secure: false, // TODO - upgrade later with STARTTLS
+    auth: {
+      user: "6adeec485fd17d",
+      pass: "77e50fbdd058b5",
+    },
+});
 
 // Get all invoices
 router.get('/', async (req, res, next) => {
@@ -80,8 +90,8 @@ router.get('/:id', async (req, res, next) => {
 
 // Add new invoice
 router.post('/', async (req, res, next) => {
-
     var date = new Date();
+
     var invoice = {
         name: req.body.name,
         email: req.body.email,
@@ -117,7 +127,8 @@ router.post('/', async (req, res, next) => {
         rowtotal_3: req.body.rowtotal_3,
         subtotal: req.body.subtotal,
         taxTotal: req.body.taxTotal,
-        total: req.body.total
+        total: req.body.total,
+        public_key: uuidv4()
     }
     try{
 
@@ -156,7 +167,7 @@ router.get('/:id/pdf',async (req, res, next) => {
         });
 
         // Pass data to PDF service and generate PDF.
-        pdfService.buildInvoicePDF((chunk) => stream.write(chunk), () => stream.end(), invoice);
+        invoicePDF = pdfService.buildInvoicePDF((chunk) => stream.write(chunk), () => stream.end(), invoice);
         
         }
         else{
@@ -168,8 +179,48 @@ router.get('/:id/pdf',async (req, res, next) => {
         console.log(e);
         res.sendStatus(500);
     }
-  });
-  
+});
+
+// Send invoice via Email
+router.post('/:id/send', async (req, res, next) => {
+    try{
+        let invoice = await invoicesDb.one(req.params.id);
+
+        if (invoice) {
+            sendInvoice(invoice);
+            res.sendStatus(200);
+        }
+        else{
+            console.log('Cannot send empty invoice object.');
+            res.sendStatus(500);
+        }
+    }
+    catch(e){
+        console.log(e);
+        res.sendStatus(500);
+    }
+});
+
+// Logic to send mail.
+function sendInvoice(invoice){
+
+    var date = invoice.due_date.toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    
+    var mailOptions = {
+        from: 'billing@clean4umtl.com',
+        to: invoice.email,
+        subject: `Invoice #${invoice.id} from Clean4U MTL`,
+        html: `<p>Hello ${invoice.name},<br/>You have a new invoice from Clean4U Montreal.<hr><br/><strong>Invoice #${invoice.id}</strong> is due by ${date}.<br/><a href="http://localhost:8000/customer/invoice/${invoice.public_key}">Click here to view your invoice.</a></p>`
+      };
+      
+      transporter.sendMail(mailOptions, function(error, info){
+        if (error) {
+          console.log(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+        }
+      });
+}
 
 module.exports = router;
 
