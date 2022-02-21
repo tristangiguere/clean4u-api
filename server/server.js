@@ -1,4 +1,6 @@
 const express = require('express');
+// Import environment
+require('dotenv').config();
 
 const invoiceService = require('./routes/invoices');
 const invoiceService_Public = require('./routes/invoices_public');
@@ -7,11 +9,23 @@ const quotesServicePublic = require('./routes/quotations_public');
 const quotationRequestService = require('./routes/requests');
 const contactService = require('./routes/contact');
 const authService = require('./routes/auth');
-const authMW = require('./middleware/auth');
 
 const app = express();
 
 app.use(express.json());
+
+// Implement server-to-server auth
+app.use((req, res, next) => {
+    // Check for Bearer auth header
+    if (!req.headers.authorization || req.headers.authorization.indexOf('Bearer ') === -1) {
+        return res.status(401).json({ message: 'Missing API Key' });
+    }
+    else if ((req.headers.authorization.split(' ')[1]) !== process.env.API_KEY){
+        return res.status(403).json({ message: 'Invalid API Key' });
+    }
+    // Allow through
+    next()
+})
 
 // Global service routes
 app.use('/api/invoices', invoiceService);
@@ -28,8 +42,6 @@ app.use('/api/contact', contactService);
 // Public quote view service (requires UUID)
 app.use('/api/public/quotations', quotesServicePublic);
 
-const PORT = 3000;
-
-app.listen(PORT, () => {
-    console.log('Clean4U API server is running on port: ' + PORT)
+app.listen(process.env.PORT, () => {
+    console.log('Clean4U API server is running on port: ' + process.env.PORT)
 });
