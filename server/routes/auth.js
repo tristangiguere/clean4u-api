@@ -41,6 +41,31 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Change password
+router.put("/changepassword", async (req, res) => {
+  try {
+    const user = await authDb.one(req.body.username);
+    
+    if (user) {
+      const cmp = await bcrypt.compare(req.body.password, user.password);
+      if (cmp) {
+        if (req.body.newpassword !== "" && req.body.password !== ""){
+          const hashedPwd = await bcrypt.hash(req.body.newpassword, saltRounds);
+          const result = await authDb.changepassword(req.body.username, hashedPwd);
+          res.status(200).send("Password updated successfully.");
+        }
+      } else {
+        res.status(401).send("Wrong username or password.");
+      }
+    } else {
+      res.status(401).send("Wrong username or password.");
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Internal Server Error Occured");
+  }
+});
+
 
 
 

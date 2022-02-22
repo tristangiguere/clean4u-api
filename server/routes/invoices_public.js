@@ -1,9 +1,6 @@
 const express = require('express');
-
 const router = express.Router();
-
 const invoicesDb = require('../data/invoices');
-
 const pdfService = require('../service/pdf-service');
 
 const { v4: uuidv4 } = require('uuid');

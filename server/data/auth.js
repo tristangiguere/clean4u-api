@@ -39,5 +39,17 @@ authDb.new = (user) => {
     })
 };
 
+// Change user password
+authDb.changepassword = (username, newpassword) => {
+    return new Promise((resolve, reject) => {
+        pool.query('UPDATE users SET password =? WHERE username=?', [username, newpassword], (err, results) => {
+            if(err){
+                return reject(err);
+            }
+            return resolve(results[0])
+        })
+    })
+};
+
 
 module.exports = authDb;

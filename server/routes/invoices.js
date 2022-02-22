@@ -5,14 +5,24 @@ const invoicesDb = require('../data/invoices');
 const pdfService = require('../service/pdf-service');
 const { v4: uuidv4 } = require('uuid');
 
+// Import environment
+require('dotenv').config();
+
+if (process.env.SMTP_SECURITY == 'true'){
+  var security = true
+}
+else{
+  var security = false;
+}
+
 // DEFINE TRANSPORT MAILER INFO
 const transporter = mailer.createTransport({
-    host: "smtp.mailtrap.io",
-    port: 587,
-    secure: false, // TODO - upgrade later with STARTTLS
+    host: process.env.SMTP_HOSTNAME,
+    port: process.env.SMTP_PORT,
+    secure: security, // TODO - upgrade later with STARTTLS
     auth: {
-      user: "6adeec485fd17d",
-      pass: "77e50fbdd058b5",
+      user: process.env.SMTP_USERNAME,
+      pass: process.env.SMTP_PASSWORD,
     },
 });
 

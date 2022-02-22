@@ -1,11 +1,7 @@
 const express = require('express');
-
 const router = express.Router();
-
 const quotationsDb = require('../data/quotations');
-
 const pdfService = require('../service/pdf-service');
-
 const { v4: uuidv4 } = require('uuid');
 
 // Get single quote by UUID (Public)
