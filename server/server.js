@@ -14,6 +14,11 @@ const app = express();
 
 app.use(express.json());
 
+// Public invoice view service (requires UUID)
+app.use('/api/public/invoices', invoiceService_Public);
+// Public quote view service (requires UUID)
+app.use('/api/public/quotations', quotesServicePublic);
+
 // Implement server-to-server auth
 app.use((req, res, next) => {
     // Check for Bearer auth header
@@ -33,14 +38,10 @@ app.use('/api/quotations', quotesService);
 app.use('/api/requests', quotationRequestService);
 app.use('/api/auth', authService);
 
-// Public invoice view service (requires UUID)
-app.use('/api/public/invoices', invoiceService_Public);
-
 // Contact form service
 app.use('/api/contact', contactService);
 
-// Public quote view service (requires UUID)
-app.use('/api/public/quotations', quotesServicePublic);
+
 
 app.listen(process.env.PORT, () => {
     console.log('Clean4U API server is running on port: ' + process.env.PORT)

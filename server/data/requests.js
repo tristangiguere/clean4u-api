@@ -1,12 +1,15 @@
 const mysql = require('mysql');
 
+// Import environment
+require('dotenv').config();
+
 const pool = mysql.createPool({
-    connectionLimit: 10,
-    password: 'toorroot',
-    user: 'root',
-    database: 'mozart',
-    host: '127.0.0.1',
-    port: '3306'
+    connectionLimit: process.env.CONNECTION_LIMIT,
+    password: process.env.DATABASE_PASSWORD,
+    user: process.env.DATABASE_USER,
+    database: process.env.DATABASE_NAME,
+    host: process.env.DATABASE_HOST,
+    port: process.env.DATABASE_PORT
 })
 
 let quoteRequestsDb ={}; 
