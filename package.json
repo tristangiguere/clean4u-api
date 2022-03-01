@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "npx nodemon server/server.js -w server"
+    "dev": "npx nodemon server/server.js -w server",
+    "test": "mocha"
   },
   "keywords": [],
   "author": "",
@@ -18,5 +19,10 @@
     "nodemailer": "^6.7.2",
     "pdfkit": "^0.13.0",
     "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "chai": "^4.3.6",
+    "mocha": "^9.2.1",
+    "supertest": "^6.2.2"
   }
 }

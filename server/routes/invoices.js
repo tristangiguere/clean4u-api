@@ -90,7 +90,13 @@ router.get('/cancelled', async (req, res, next) => {
 router.get('/:id', async (req, res, next) => {
     try{
         let results = await invoicesDb.one(req.params.id);
-        res.json(results);
+        if (results){
+            res.json(results);
+        }
+        else{
+            res.sendStatus(404);
+        }
+        
     }
     catch(e){
         console.log(e);
@@ -154,8 +160,15 @@ router.post('/', async (req, res, next) => {
 // Cancel invoice
 router.put('/:id/cancel', async (req, res, next) => {
     try{
-        let results = await invoicesDb.cancel(req.params.id);
-        res.json(results);
+        let invoice = await invoicesDb.one(req.params.id);
+        if (invoice){
+            let results = await invoicesDb.cancel(invoice.id);
+            res.sendStatus(200);
+        }
+        else{
+            res.sendStatus(404);
+        }
+        
     }
     catch(e){
         console.log(e);

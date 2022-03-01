@@ -77,7 +77,13 @@ router.get('/cancelled', async (req, res, next) => {
 router.get('/:id', async (req, res, next) => {
     try{
         let results = await quotationDb.one(req.params.id);
-        res.json(results);
+        if (results){
+            res.json(results);
+        }
+        else{
+            res.sendStatus(404);
+        }
+        
     }
     catch(e){
         console.log(e);
@@ -145,8 +151,14 @@ router.post('/', async (req, res, next) => {
 // Cancel quotation
 router.put('/:id/cancel', async (req, res, next) => {
     try{
-        let results = await quotationDb.cancel(req.params.id);
-        res.json(results);
+        let quotation = await quotationDb.one(req.params.id);
+        if (quotation){
+            let results = await quotationDb.cancel(req.params.id);
+            res.sendStatus(200);
+        }
+        else{
+            res.sendStatus(404);
+        }
     }
     catch(e){
         console.log(e);
@@ -165,7 +177,7 @@ router.post('/:id/send', async (req, res, next) => {
         }
         else{
             console.log('Cannot send empty quotation object.');
-            res.sendStatus(500);
+            res.sendStatus(404);
         }
     }
     catch(e){

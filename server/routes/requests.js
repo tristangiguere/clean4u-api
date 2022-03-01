@@ -40,7 +40,14 @@ router.get('/', async (req, res, next) => {
 router.get('/:id', async (req, res, next) => {
     try{
         let results = await quoteRequestsDb.one(req.params.id);
-        res.json(results);
+        if (results){
+            res.json(results);
+            res.sendStatus(200);
+        }
+        else{
+            res.sendStatus(404);
+        }
+        
     }
     catch(e){
         console.log(e);
@@ -79,8 +86,14 @@ router.post('/', async (req, res, next) => {
 // Delete request
 router.delete('/:id', async (req, res, next) => {
     try{
-        let results = await quoteRequestsDb.delete(req.params.id);
-        res.json(results);
+        let request = await quoteRequestsDb.one(req.params.id);
+        if (request){
+            let results = await quoteRequestsDb.delete(req.params.id);
+            res.sendStatus(200);
+        }
+        else{
+            res.sendStatus(404);
+        }
     }
     catch(e){
         console.log(e);
@@ -127,5 +140,7 @@ function replyToRequest(quoteRequest, message){
 }
 
 module.exports = router;
+
+
 
 
